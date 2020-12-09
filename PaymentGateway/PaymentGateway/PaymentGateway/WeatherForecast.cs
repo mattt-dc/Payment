@@ -1,6 +1,6 @@
 using System;
 
-namespace PaymentGateway
+namespace PaymentGateway.Api
 {
     public class WeatherForecast
     {
