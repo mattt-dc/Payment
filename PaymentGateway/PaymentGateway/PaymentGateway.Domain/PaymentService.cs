@@ -2,27 +2,28 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace PaymentGateway.Domain
 {
     public class PaymentService
     {
-        public AuthorizationOutput AuthorizeTransaction(AuthorizationInput authorizationInput)
+        public Task<AuthorizationOutput> AuthorizeTransaction(AuthorizationInput authorizationInput)
         {
 
         }
 
-        public TransactionOutput CapturePayment(PaymentRequest paymentRequest)
+        public Task<TransactionOutput> CapturePayment(PaymentRequest paymentRequest)
         {
 
         }
 
-        public TransactionOutput VoidTransaction(long authorizationId)
+        public Task<TransactionOutput> VoidTransaction(long authorizationId)
         {
 
         }
 
-        public TransactionOutput RefundPayment(PaymentRequest paymentRequest)
+        public Task<TransactionOutput> RefundPayment(PaymentRequest paymentRequest)
         {
 
         }
