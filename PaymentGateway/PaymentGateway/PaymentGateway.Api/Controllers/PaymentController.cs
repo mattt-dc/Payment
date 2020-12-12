@@ -25,5 +25,23 @@ namespace PaymentGateway.Api.Controllers
         {
             //Return required output
         }
+
+        [HttpPost]
+        public async void Capture(CaptureRequest request)
+        {
+
+        }
+
+        [HttpPost]
+        public async void Void(VoidRequest request)
+        {
+
+        }
+
+        [HttpPost]
+        public async void Refund(RefundRequest request)
+        {
+
+        }
     }
 }
