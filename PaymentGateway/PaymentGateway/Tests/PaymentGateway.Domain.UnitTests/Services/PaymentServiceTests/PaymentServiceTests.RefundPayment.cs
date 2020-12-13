@@ -1,5 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using PaymentGateway.Domain.Entities;
+using PaymentGateway.Domain.Interfaces.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -10,13 +12,14 @@ namespace PaymentGateway.Domain.UnitTests.Services.PaymentServiceTests
     {
         public void RefundPayment_Success_ReturnsSuccess()
         {
+            Mock<IPaymentRepository> mockRepository = GetMockRepository();
             PaymentRequest request = new PaymentRequest
             {
                 Amount = 5M,
                 AuthorizationId = 1
             };
 
-            PaymentService service = new PaymentService();
+            PaymentService service = GetService(mockRepository);
 
             TransactionOutput output = service.RefundPayment(request).Result;
 
@@ -25,13 +28,14 @@ namespace PaymentGateway.Domain.UnitTests.Services.PaymentServiceTests
 
         public void RefundPayment_InvalidAmount_ReturnsError()
         {
+            Mock<IPaymentRepository> mockRepository = GetMockRepository();
             PaymentRequest request = new PaymentRequest
             {
                 Amount = 12M,
                 AuthorizationId = 1
             };
 
-            PaymentService service = new PaymentService();
+            PaymentService service = GetService(mockRepository);
 
             TransactionOutput output = service.RefundPayment(request).Result;
 

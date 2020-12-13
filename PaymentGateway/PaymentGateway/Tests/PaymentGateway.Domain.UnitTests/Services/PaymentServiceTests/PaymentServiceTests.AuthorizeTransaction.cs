@@ -1,5 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using PaymentGateway.Domain.Entities;
+using PaymentGateway.Domain.Interfaces.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -10,6 +12,7 @@ namespace PaymentGateway.Domain.UnitTests.Services.PaymentServiceTests
     {
         public void AuthorizeTransaction_ServiceAuthorizes_ReturnsAuthorizationId()
         {
+            Mock<IPaymentRepository> mockRepository = GetMockRepository();
             AuthorizationInput input = new AuthorizationInput
             {
                 Card = new CreditCard
@@ -20,7 +23,7 @@ namespace PaymentGateway.Domain.UnitTests.Services.PaymentServiceTests
                 Currency = "GBP"
             };
 
-            PaymentService service = new PaymentService();
+            PaymentService service = GetService(mockRepository);
 
             AuthorizationOutput output = service.AuthorizeTransaction(input).Result;
 
@@ -29,6 +32,7 @@ namespace PaymentGateway.Domain.UnitTests.Services.PaymentServiceTests
 
         public void AuthorizeTransaction_ServiceDoesNotAuthorize_ReturnsErrorMessage()
         {
+            Mock<IPaymentRepository> mockRepository = GetMockRepository();
             AuthorizationInput input = new AuthorizationInput
             {
                 Card = new CreditCard
@@ -40,7 +44,7 @@ namespace PaymentGateway.Domain.UnitTests.Services.PaymentServiceTests
                 Currency = "GBP"
             };
 
-            PaymentService service = new PaymentService();
+            PaymentService service = GetService(mockRepository);
 
             AuthorizationOutput output = service.AuthorizeTransaction(input).Result;
 
