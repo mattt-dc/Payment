@@ -21,8 +21,8 @@ RUN dotnet publish "PaymentGateway.Api.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-COPY ["PaymentGateway.Api/entrypoint.sh", "/"]
+COPY ["PaymentGateway.Api/wait-for-it.sh", "/"]
 
-RUN chmod +x /entrypoint.sh
-CMD /bin/bash /entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]
+RUN chmod +x /wait-for-it.sh
+CMD /bin/bash /wait-for-it.sh
+ENTRYPOINT ["/wait-for-it.sh", "db:1433", "-t", "240", "--", "dotnet", "PaymentGateway.Api.dll"]
