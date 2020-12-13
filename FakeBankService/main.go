@@ -2,14 +2,15 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 )
 
 type authorizationRequest struct {
-	CardNumber string `json:"cardNumber"`
-	Amount     int    `json:"amount"`
+	CardNumber string  `json:"cardNumber"`
+	Amount     float64 `json:"amount"`
 }
 
 func textBytesFromHTTPRequest(request *http.Request) []byte {
@@ -26,7 +27,11 @@ func authorizePayment(w http.ResponseWriter, r *http.Request) {
 	textBytes := textBytesFromHTTPRequest(r)
 	authorizationRequest := authorizationRequest{}
 	json.Unmarshal(textBytes, &authorizationRequest)
-	w.Write([]byte(`{"message": "card authorized"}`))
+	amount := 0.0
+	if authorizationRequest.CardNumber != "4000000000000119" {
+		amount = authorizationRequest.Amount
+	}
+	w.Write([]byte(fmt.Sprintf(`{"authorizedAmount": "%f"}`, amount)))
 }
 
 func handleRequests() {
