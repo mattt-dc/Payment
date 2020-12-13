@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using PaymentGateway.Data;
 using PaymentGateway.Domain;
+using PaymentGateway.Domain.Interfaces.Repositories;
 
 namespace PaymentGateway.Api
 {
@@ -34,13 +35,15 @@ namespace PaymentGateway.Api
             services.AddDbContext<PaymentContext>(
                 Options => Options.UseSqlServer(connectionString));
             services.AddScoped<PaymentService>();
-            services.AddScoped<PaymentRepository>();
+            services.AddScoped<IPaymentRepository, PaymentRepository>();
             services.AddControllers();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, PaymentContext dataContext)
         {
+            dataContext.Database.Migrate();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

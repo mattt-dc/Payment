@@ -11,6 +11,11 @@ namespace PaymentGateway.Domain
     {
         private readonly IPaymentRepository _paymentRepository;
 
+        public PaymentService(IPaymentRepository paymentRepository)
+        {
+            _paymentRepository = paymentRepository;
+        }
+
         public async Task<AuthorizationOutput> AuthorizeTransaction(AuthorizationInput authorizationInput)
         {
             //Do basic check of credit card data
