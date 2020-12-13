@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using PaymentGateway.Data;
+using PaymentGateway.Domain;
 
 namespace PaymentGateway.Api
 {
@@ -32,6 +33,8 @@ namespace PaymentGateway.Api
             //There are ways to avoid this but I will leave as is due to time constraints
             services.AddDbContext<PaymentContext>(
                 Options => Options.UseSqlServer(connectionString));
+            services.AddScoped<PaymentService>();
+            services.AddScoped<PaymentRepository>();
             services.AddControllers();
         }
 
