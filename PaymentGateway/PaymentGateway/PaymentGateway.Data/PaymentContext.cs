@@ -14,5 +14,9 @@ namespace PaymentGateway.Data
         }
 
         public DbSet<Authorization> Authorizations { get; set; }
+
+        //The connection string should be in a config file
+        protected override void OnConfiguring(DbContextOptionsBuilder options)
+            => options.UseSqlServer(@"Server=db;Database=master;User=sa;Password=Pa55w0rd;");
     }
 }

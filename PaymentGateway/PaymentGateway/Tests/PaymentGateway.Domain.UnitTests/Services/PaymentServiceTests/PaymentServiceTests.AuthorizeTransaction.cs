@@ -22,7 +22,7 @@ namespace PaymentGateway.Domain.UnitTests.Services.PaymentServiceTests
 
             PaymentService service = new PaymentService();
 
-            AuthorizationOutput output = service.AuthorizeTransaction(input);
+            AuthorizationOutput output = service.AuthorizeTransaction(input).Result;
 
             Assert.IsNotNull(output.AuthorizationId);
         }
@@ -42,7 +42,7 @@ namespace PaymentGateway.Domain.UnitTests.Services.PaymentServiceTests
 
             PaymentService service = new PaymentService();
 
-            AuthorizationOutput output = service.AuthorizeTransaction(input);
+            AuthorizationOutput output = service.AuthorizeTransaction(input).Result;
 
             Assert.IsNotNull(output.TransactionOutput.Error);
             Assert.IsTrue(output.TransactionOutput.Error.Length > 0);

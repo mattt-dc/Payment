@@ -12,7 +12,7 @@ namespace PaymentGateway.Domain.UnitTests.Services.PaymentServiceTests
         {
             PaymentService service = new PaymentService();
 
-            TransactionOutput output = service.VoidTransaction(1);
+            TransactionOutput output = service.VoidTransaction(1).Result;
 
             Assert.IsTrue(output.Success);
         }
@@ -21,7 +21,7 @@ namespace PaymentGateway.Domain.UnitTests.Services.PaymentServiceTests
         {
             PaymentService service = new PaymentService();
 
-            TransactionOutput output = service.VoidTransaction(1);
+            TransactionOutput output = service.VoidTransaction(1).Result;
 
             Assert.IsNotNull(output.Error);
             Assert.IsTrue(output.Error.Length > 0);

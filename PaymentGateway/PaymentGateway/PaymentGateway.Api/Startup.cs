@@ -6,10 +6,11 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using PaymentGateway.Data;
 
 namespace PaymentGateway.Api
 {
@@ -25,6 +26,12 @@ namespace PaymentGateway.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            //The connection string should be in a config file
+            var connectionString = @"Server=db;Database=master;User=sa;Password=Pa55w0rd;";
+            //This adds a reference to the data project
+            //There are ways to avoid this but I will leave as is due to time constraints
+            services.AddDbContext<PaymentContext>(
+                Options => Options.UseSqlServer(connectionString));
             services.AddControllers();
         }
 

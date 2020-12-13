@@ -18,7 +18,7 @@ namespace PaymentGateway.Domain.UnitTests.Services.PaymentServiceTests
 
             PaymentService service = new PaymentService();
 
-            TransactionOutput output = service.CapturePayment(request);
+            TransactionOutput output = service.CapturePayment(request).Result;
 
             Assert.IsTrue(output.AmountAvailable == 5M);
         }
@@ -33,7 +33,7 @@ namespace PaymentGateway.Domain.UnitTests.Services.PaymentServiceTests
 
             PaymentService service = new PaymentService();
 
-            TransactionOutput output = service.CapturePayment(request);
+            TransactionOutput output = service.CapturePayment(request).Result;
 
             Assert.IsNotNull(output.Error);
             Assert.IsFalse(output.Success);

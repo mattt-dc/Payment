@@ -18,7 +18,7 @@ namespace PaymentGateway.Domain.UnitTests.Services.PaymentServiceTests
 
             PaymentService service = new PaymentService();
 
-            TransactionOutput output = service.RefundPayment(request);
+            TransactionOutput output = service.RefundPayment(request).Result;
 
             Assert.IsTrue(output.Success);
         }
@@ -33,7 +33,7 @@ namespace PaymentGateway.Domain.UnitTests.Services.PaymentServiceTests
 
             PaymentService service = new PaymentService();
 
-            TransactionOutput output = service.RefundPayment(request);
+            TransactionOutput output = service.RefundPayment(request).Result;
 
             Assert.IsFalse(output.Success);
             Assert.IsNotNull(output.Error);
