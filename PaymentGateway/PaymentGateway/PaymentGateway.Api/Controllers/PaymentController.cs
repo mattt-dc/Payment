@@ -22,7 +22,7 @@ namespace PaymentGateway.Api.Controllers
             _service = service;
         }
 
-        [HttpPost]
+        [HttpPost("Authorize")]
         public async Task<IActionResult> Authorize(AuthorizationRequest request)
         {
             AuthorizationInput input = new AuthorizationInput
@@ -51,7 +51,7 @@ namespace PaymentGateway.Api.Controllers
             return Ok(response);
         }
 
-        [HttpPost]
+        [HttpPost("Capture")]
         public async Task<IActionResult> Capture(CaptureRequest request)
         {
             PaymentRequest paymentRequest = new PaymentRequest
@@ -72,7 +72,7 @@ namespace PaymentGateway.Api.Controllers
             return Ok(response);
         }
 
-        [HttpPost]
+        [HttpPost("Void")]
         public async Task<IActionResult> Void(VoidRequest request)
         {
             TransactionOutput serviceResponse = await _service.VoidTransaction(request.AuthorizationId);
@@ -88,7 +88,7 @@ namespace PaymentGateway.Api.Controllers
             return Ok(response);
         }
 
-        [HttpPost]
+        [HttpPost("Refund")]
         public async Task<IActionResult> Refund(RefundRequest request)
         {
             PaymentRequest paymentRequest = new PaymentRequest
