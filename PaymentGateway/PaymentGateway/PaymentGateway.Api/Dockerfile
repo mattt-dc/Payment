@@ -22,7 +22,7 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 COPY ["PaymentGateway.Api/entrypoint.sh", "/"]
-ENTRYPOINT ["dotnet", "PaymentGateway.Api.dll"]
 
 RUN chmod +x /entrypoint.sh
 CMD /bin/bash /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
