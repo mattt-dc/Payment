@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using CreditCardValidator;
+using Newtonsoft.Json;
 using PaymentGateway.Domain.Entities;
 using PaymentGateway.Domain.Interfaces.Repositories;
 using System;
@@ -24,7 +25,15 @@ namespace PaymentGateway.Domain
 
         public async Task<AuthorizationOutput> AuthorizeTransaction(AuthorizationInput authorizationInput)
         {
-            //Todo: do basic check of credit card data
+            //Check card number is valid
+            bool validCreditCardNumber = CardNumberIsValid(authorizationInput, out string cardNumber);
+            if (!validCreditCardNumber)
+            {
+                AuthorizationOutput authorizationOutput = GetFailedAuthorizationOuput("Invalid credit card");
+                return authorizationOutput;
+            }
+            authorizationInput.Card.CardNumber = cardNumber;
+
             //Authorize transaction with bank
             BankAuthorizationResponse bankAuthorization = await GetAuthorizationFromBank(authorizationInput);
             if (bankAuthorization.authorizedAmount == 0)
@@ -33,6 +42,8 @@ namespace PaymentGateway.Domain
                 AuthorizationOutput failedAuthorizationOutput = GetFailedAuthorizationOuput(error);
                 return failedAuthorizationOutput;
             }
+
+            //Add authorization to the database
             Transaction transaction = await _paymentRepository.GetAuthorization(authorizationInput.Amount,
                 authorizationInput.Currency, bankAuthorization.id);
 
@@ -48,6 +59,22 @@ namespace PaymentGateway.Domain
                 }
             };
             return output;
+        }
+
+        private static bool CardNumberIsValid(AuthorizationInput authorizationInput, out string cardNumber)
+        {
+            cardNumber = authorizationInput.Card.CardNumber;
+            if (cardNumber.Any(c => !char.IsDigit(c) && c != ' '))
+            {
+                return false;
+            }
+            CreditCardDetector detector = new CreditCardDetector(authorizationInput.Card.CardNumber);
+            if (detector.IsValid())
+            {
+                cardNumber = detector.CardNumber;
+                return true;
+            }
+            return false;
         }
 
         private static AuthorizationOutput GetFailedAuthorizationOuput(string error)
