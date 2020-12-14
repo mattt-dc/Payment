@@ -15,7 +15,8 @@ namespace PaymentGateway.Data.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Currency = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Void = table.Column<bool>(type: "bit", nullable: false)
+                    Void = table.Column<bool>(type: "bit", nullable: false),
+                    ExternalId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {

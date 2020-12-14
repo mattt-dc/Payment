@@ -19,13 +19,14 @@ namespace PaymentGateway.Data
             _dbContext = dbContext;
         }
 
-        public async Task<Transaction> GetAuthorization(decimal amount, string currency)
+        public async Task<Transaction> GetAuthorization(decimal amount, string currency, long externalId)
         {
             var newAuthorization = new Authorization
             {
                 Amount = amount,
                 Currency = currency,
-                Void = false
+                Void = false,
+                ExternalId = externalId
             };
             _dbContext.Authorizations.Add(newAuthorization);
             await _dbContext.SaveChangesAsync();
@@ -35,7 +36,8 @@ namespace PaymentGateway.Data
             {
                 AmountAvailable = newAuthorization.Amount,
                 Currency = newAuthorization.Currency,
-                Id = newAuthorization.Id
+                Id = newAuthorization.Id,
+                ExternalId = newAuthorization.ExternalId
             };
             return transaction;
         }

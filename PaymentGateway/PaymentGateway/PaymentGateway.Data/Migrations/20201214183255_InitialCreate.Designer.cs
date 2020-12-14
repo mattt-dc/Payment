@@ -10,7 +10,7 @@ using PaymentGateway.Data;
 namespace PaymentGateway.Data.Migrations
 {
     [DbContext(typeof(PaymentContext))]
-    [Migration("20201213150705_InitialCreate")]
+    [Migration("20201214183255_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,6 +33,9 @@ namespace PaymentGateway.Data.Migrations
 
                     b.Property<string>("Currency")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("ExternalId")
+                        .HasColumnType("bigint");
 
                     b.Property<bool>("Void")
                         .HasColumnType("bit");

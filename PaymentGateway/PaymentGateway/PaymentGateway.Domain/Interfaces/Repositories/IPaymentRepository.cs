@@ -8,7 +8,7 @@ namespace PaymentGateway.Domain.Interfaces.Repositories
 {
     public interface IPaymentRepository
     {
-        public Task<Transaction> GetAuthorization(decimal amount, string currency);
+        public Task<Transaction> GetAuthorization(decimal amount, string currency, long authorizationId);
 
         public Task<bool> RecordPayment(long authorizationId, decimal amount);
 

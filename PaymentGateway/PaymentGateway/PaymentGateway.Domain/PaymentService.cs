@@ -23,29 +23,24 @@ namespace PaymentGateway.Domain
 
         public async Task<AuthorizationOutput> AuthorizeTransaction(AuthorizationInput authorizationInput)
         {
-            //Do basic check of credit card data
+            //Todo: do basic check of credit card data
             //Authorize transaction with bank
-            decimal authorizedAmount = await GetAuthorizationFromBank(authorizationInput);
-            if (authorizedAmount == 0)
+            BankAuthorizationResponse bankAuthorization = await GetAuthorizationFromBank(authorizationInput);
+            if (bankAuthorization.authorizedAmount == 0)
             {
-                return new AuthorizationOutput
-                {
-                    TransactionOutput = new TransactionOutput
-                    {
-                        Success = false,
-                        Error = "Failed to authorize"
-                    }
-                };
+                string error = "Failed to authorize";
+                AuthorizationOutput failedAuthorizationOutput = GetFailedAuthorizationOuput(error);
+                return failedAuthorizationOutput;
             }
             Transaction transaction = await _paymentRepository.GetAuthorization(authorizationInput.Amount,
-                authorizationInput.Currency);
+                authorizationInput.Currency, bankAuthorization.id);
 
             AuthorizationOutput output = new AuthorizationOutput
             {
                 AuthorizationId = transaction.Id,
                 TransactionOutput = new TransactionOutput
                 {
-                    AmountAvailable = authorizedAmount,
+                    AmountAvailable = bankAuthorization.authorizedAmount,
                     Currency = authorizationInput.Currency,
                     Error = null,
                     Success = true
@@ -54,13 +49,24 @@ namespace PaymentGateway.Domain
             return output;
         }
 
-        private async Task<decimal> GetAuthorizationFromBank(AuthorizationInput authorizationInput)
+        private static AuthorizationOutput GetFailedAuthorizationOuput(string error)
+        {
+            return new AuthorizationOutput
+            {
+                TransactionOutput = new TransactionOutput
+                {
+                    Success = false,
+                    Error = error
+                }
+            };
+        }
+
+        private async Task<BankAuthorizationResponse> GetAuthorizationFromBank(AuthorizationInput authorizationInput)
         {
             ByteArrayContent byteContent = GetAuthorizationRequestByteContent(authorizationInput);
             HttpResponseMessage response = await _client.PostAsync(bankApiAddress + "authorize", byteContent);
-            dynamic responseContent = await response.Content.ReadAsAsync<object>();
-            decimal authorizedAmount = !response.IsSuccessStatusCode ? 0 : responseContent.authorizedAmount;
-            return authorizedAmount;
+            var responseContent = await response.Content.ReadAsAsync<BankAuthorizationResponse>();
+            return responseContent;
         }
 
         private static ByteArrayContent GetAuthorizationRequestByteContent(AuthorizationInput authorizationInput)

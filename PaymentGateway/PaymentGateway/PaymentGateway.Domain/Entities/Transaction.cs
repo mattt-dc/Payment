@@ -9,5 +9,6 @@ namespace PaymentGateway.Domain.Entities
         public long Id { get; set; }
         public decimal AmountAvailable { get; set; }
         public string Currency { get; set; }
+        public long ExternalId { get; set; }
     }
 }

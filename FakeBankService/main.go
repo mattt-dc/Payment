@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net/http"
 )
 
@@ -31,11 +32,16 @@ func authorizePayment(w http.ResponseWriter, r *http.Request) {
 	if authorizationRequest.CardNumber != "4000000000000119" {
 		amount = authorizationRequest.Amount
 	}
-	w.Write([]byte(fmt.Sprintf(`{"authorizedAmount": "%f"}`, amount)))
+	w.Write([]byte(fmt.Sprintf(`{"authorizedAmount": "%f", "id": "%d"}`, amount, rand.Intn(1000000))))
+}
+
+func recordPayment(w http.ResponseWriter, r *http.Request) {
+
 }
 
 func handleRequests() {
 	http.HandleFunc("/authorize", authorizePayment)
+	http.HandleFunc("/recordPayment", recordPayment)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 

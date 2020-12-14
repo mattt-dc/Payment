@@ -32,6 +32,9 @@ namespace PaymentGateway.Data.Migrations
                     b.Property<string>("Currency")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<long>("ExternalId")
+                        .HasColumnType("bigint");
+
                     b.Property<bool>("Void")
                         .HasColumnType("bit");
 
