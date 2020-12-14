@@ -23,6 +23,11 @@ type voidRequest struct {
 	ID int64 `json:"id"`
 }
 
+type refundRequest struct {
+	ID     int64   `json:"id"`
+	Amount float64 `json:"amount"`
+}
+
 func textBytesFromHTTPRequest(request *http.Request) []byte {
 	b, err := ioutil.ReadAll(request.Body)
 	if err != nil {
@@ -72,10 +77,23 @@ func void(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(fmt.Sprintf("success")))
 }
 
+func recordRefund(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	textBytes := textBytesFromHTTPRequest(r)
+	refundRequest := refundRequest{}
+	json.Unmarshal(textBytes, &refundRequest)
+	success := "failure"
+	if refundRequest.ID != 614562 {
+		success = "success"
+	}
+	w.Write([]byte(fmt.Sprintf(success)))
+}
+
 func handleRequests() {
 	http.HandleFunc("/authorize", authorizePayment)
 	http.HandleFunc("/recordPayment", recordPayment)
 	http.HandleFunc("/void", void)
+	http.HandleFunc("/recordRefund", recordRefund)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 

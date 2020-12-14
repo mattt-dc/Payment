@@ -93,7 +93,7 @@ namespace PaymentGateway.Domain
         {
             //Check valid
             Transaction transaction = await _paymentRepository.GetTransaction(paymentRequest.AuthorizationId);
-            if (transaction == null)
+            if (transaction == null || transaction.Refunds.Count > 0)
             {
                 string error = "Invalid payment";
                 TransactionOutput transactionOutput = GetFailedTransactionOutput(error);
@@ -199,17 +199,53 @@ namespace PaymentGateway.Domain
 
         public async Task<TransactionOutput> RefundPayment(PaymentRequest paymentRequest)
         {
+            //Check valid
+            Transaction transaction = await _paymentRepository.GetTransaction(paymentRequest.AuthorizationId);
+            if (transaction == null)
+            {
+                string error = "Invalid refund";
+                TransactionOutput transactionOutput = GetFailedTransactionOutput(error);
+                return transactionOutput;
+            }
+            decimal paymentAmountsTotal = transaction.Payments.Sum(x => x.Amount);
+            decimal totalAvailable = GetTotalAmountAvailable(transaction);
+            if (paymentAmountsTotal < paymentRequest.Amount || totalAvailable < paymentRequest.Amount)
+            {
+                TransactionOutput transactionOutput = GetFailedTransactionOutput("Invalid amount");
+                return transactionOutput;
+            }
             //Send to bank
-            //If fails to send return here
+            string responseMessage = await SendRefundToBank(paymentRequest, transaction);
+            if (responseMessage != "success")
+            {
+                TransactionOutput transactionOutput = GetFailedTransactionOutput("Refund declined");
+                return transactionOutput;
+            }
 
             bool recorded = await _paymentRepository.RecordRefund(paymentRequest.AuthorizationId, paymentRequest.Amount);
+            //Todo: log if fails to record
 
-            //Get amount available and currency from db
             TransactionOutput output = new TransactionOutput
             {
-
+                AmountAvailable = totalAvailable + paymentRequest.Amount,
+                Currency = transaction.Currency,
+                Error = null,
+                Success = true
             };
             return output;
+        }
+
+        private async Task<string> SendRefundToBank(PaymentRequest paymentRequest, Transaction transaction)
+        {
+            dynamic recordRefundRequest = new
+            {
+                ID = transaction.ExternalId,
+                Amount = paymentRequest.Amount
+            };
+            ByteArrayContent requestContent = GetByteContentFromDynamicObject(recordRefundRequest);
+            HttpResponseMessage response = await _client.PostAsync(bankApiAddress + "recordRefund", requestContent);
+            string responseMessage = await response.Content.ReadAsStringAsync();
+            return responseMessage;
         }
     }
 }
