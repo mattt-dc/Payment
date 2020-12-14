@@ -42,6 +42,56 @@ namespace PaymentGateway.Data
             return transaction;
         }
 
+        public async Task<Transaction> GetTransaction(long authorizationId)
+        {
+            var authorization = await _dbContext.Authorizations.Include(x => x.Payments)
+                .Include(x => x.Refunds)
+                .FirstAsync(x => x.Id.Equals(authorizationId) && !x.Void);
+
+            Transaction transaction = new Transaction
+            {
+                AmountAvailable = authorization.Amount,
+                Currency = authorization.Currency,
+                ExternalId = authorization.ExternalId,
+                Id = authorization.Id
+            };
+            List<Domain.Entities.Payment> payments = GetPayments(authorization);
+            transaction.Payments = payments;
+            List<Domain.Entities.Refund> refunds = GetRefunds(authorization);
+            transaction.Refunds = refunds;
+            return transaction;
+        }
+
+        private static List<Domain.Entities.Refund> GetRefunds(Authorization authorization)
+        {
+            List<Domain.Entities.Refund> refunds = new List<Domain.Entities.Refund>();
+            foreach (var refund in authorization.Refunds)
+            {
+                refunds.Add(new Domain.Entities.Refund
+                {
+                    Amount = refund.Amount,
+                    Date = refund.Date
+                });
+            }
+
+            return refunds;
+        }
+
+        private static List<Domain.Entities.Payment> GetPayments(Authorization authorization)
+        {
+            List<Domain.Entities.Payment> payments = new List<Domain.Entities.Payment>();
+            foreach (var payment in authorization.Payments)
+            {
+                payments.Add(new Domain.Entities.Payment
+                {
+                    Amount = payment.Amount,
+                    Date = payment.Date
+                });
+            }
+
+            return payments;
+        }
+
         public async Task<bool> MarkTransactionAsVoid(long authorizationId)
         {
             //Marking as void in this way will mean that the time when this was changed will not be in db
@@ -54,7 +104,7 @@ namespace PaymentGateway.Data
 
         public async Task<bool> RecordPayment(long authorizationId, decimal amount)
         {
-            Payment payment = new Payment
+            Entities.Payment payment = new Entities.Payment
             {
                 Amount = amount,
                 AuthorizationId = authorizationId,
@@ -69,7 +119,7 @@ namespace PaymentGateway.Data
 
         public async Task<bool> RecordRefund(long authorizationId, decimal amount)
         {
-            Refund refund = new Refund
+            Entities.Refund refund = new Entities.Refund
             {
                 Amount = amount,
                 AuthorizationId = authorizationId,

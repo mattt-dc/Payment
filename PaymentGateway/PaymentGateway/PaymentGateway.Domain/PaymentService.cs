@@ -3,6 +3,7 @@ using PaymentGateway.Domain.Entities;
 using PaymentGateway.Domain.Interfaces.Repositories;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -76,7 +77,13 @@ namespace PaymentGateway.Domain
                 cardNumber = authorizationInput.Card.CardNumber,
                 amount = authorizationInput.Amount
             };
-            var json = JsonConvert.SerializeObject(authorizationRequest);
+            ByteArrayContent byteContent = GetByteContentFromDynamicObject(authorizationRequest);
+            return byteContent;
+        }
+
+        private static ByteArrayContent GetByteContentFromDynamicObject(dynamic dynamicObject)
+        {
+            var json = JsonConvert.SerializeObject(dynamicObject);
             var buffer = System.Text.Encoding.UTF8.GetBytes(json);
             var byteContent = new ByteArrayContent(buffer);
             return byteContent;
@@ -84,18 +91,69 @@ namespace PaymentGateway.Domain
 
         public async Task<TransactionOutput> CapturePayment(PaymentRequest paymentRequest)
         {
+            //Check valid
+            Transaction transaction = await _paymentRepository.GetTransaction(paymentRequest.AuthorizationId);
+            if (transaction == null)
+            {
+                string error = "Invalid payment";
+                TransactionOutput transactionOutput = GetFailedTransactionOutput(error);
+                return transactionOutput;
+            }
+            decimal totalAvailable = GetTotalAmountAvailable(transaction);
+            if (totalAvailable < paymentRequest.Amount)
+            {
+                TransactionOutput transactionOutput = GetFailedTransactionOutput("Invalid amount");
+                return transactionOutput;
+            }
             //Send to bank
-            //If fails to send return here
+            string responseMessage = await SendPaymentToBank(paymentRequest, transaction);
+            if (responseMessage != "success")
+            {
+                TransactionOutput transactionOutput = GetFailedTransactionOutput("Payment declined");
+                return transactionOutput;
+            }
 
             bool recorded = await _paymentRepository.RecordPayment(paymentRequest.AuthorizationId, paymentRequest.Amount);
-
-            //Get amount available and currency from db
+            //Todo: log if payment fails to record
 
             TransactionOutput output = new TransactionOutput
             {
-                
+                AmountAvailable = totalAvailable - paymentRequest.Amount,
+                Currency = transaction.Currency,
+                Error = null,
+                Success = true
             };
             return output;
+        }
+
+        private async Task<string> SendPaymentToBank(PaymentRequest paymentRequest, Transaction transaction)
+        {
+            dynamic recordPaymentRequest = new
+            {
+                ID = transaction.ExternalId,
+                Amount = paymentRequest.Amount
+            };
+            ByteArrayContent requestContent = GetByteContentFromDynamicObject(recordPaymentRequest);
+            HttpResponseMessage response = await _client.PostAsync(bankApiAddress + "recordPayment", requestContent);
+            string responseMessage = await response.Content.ReadAsStringAsync();
+            return responseMessage;
+        }
+
+        private static decimal GetTotalAmountAvailable(Transaction transaction)
+        {
+            decimal paymentAmountsTotal = transaction.Payments.Sum(x => x.Amount);
+            decimal refundAmountsTotal = transaction.Refunds.Sum(x => x.Amount);
+            decimal totalAvailable = transaction.AmountAvailable + refundAmountsTotal - paymentAmountsTotal;
+            return totalAvailable;
+        }
+
+        private static TransactionOutput GetFailedTransactionOutput(string error)
+        {
+            return new TransactionOutput
+            {
+                Success = false,
+                Error = error
+            };
         }
 
         public async Task<TransactionOutput> VoidTransaction(long authorizationId)

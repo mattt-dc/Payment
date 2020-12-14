@@ -10,5 +10,7 @@ namespace PaymentGateway.Domain.Entities
         public decimal AmountAvailable { get; set; }
         public string Currency { get; set; }
         public long ExternalId { get; set; }
+        public List<Payment> Payments { get; set; }
+        public List<Refund> Refunds { get; set; }
     }
 }

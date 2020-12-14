@@ -15,5 +15,7 @@ namespace PaymentGateway.Domain.Interfaces.Repositories
         public Task<bool> MarkTransactionAsVoid(long authorizationId);
 
         public Task<bool> RecordRefund(long authorizationId, decimal amount);
+
+        public Task<Transaction> GetTransaction(long authorizationId);
     }
 }
