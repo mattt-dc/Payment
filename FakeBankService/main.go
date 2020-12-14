@@ -19,6 +19,10 @@ type paymentRequest struct {
 	Amount float64 `json:"amount"`
 }
 
+type voidRequest struct {
+	ID int64 `json:"id"`
+}
+
 func textBytesFromHTTPRequest(request *http.Request) []byte {
 	b, err := ioutil.ReadAll(request.Body)
 	if err != nil {
@@ -60,9 +64,18 @@ func recordPayment(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(fmt.Sprintf(success)))
 }
 
+func void(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	textBytes := textBytesFromHTTPRequest(r)
+	voidRequest := voidRequest{}
+	json.Unmarshal(textBytes, &voidRequest)
+	w.Write([]byte(fmt.Sprintf("success")))
+}
+
 func handleRequests() {
 	http.HandleFunc("/authorize", authorizePayment)
 	http.HandleFunc("/recordPayment", recordPayment)
+	http.HandleFunc("/void", void)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 

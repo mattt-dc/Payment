@@ -31,7 +31,6 @@ namespace PaymentGateway.Data
             _dbContext.Authorizations.Add(newAuthorization);
             await _dbContext.SaveChangesAsync();
 
-            //Todo: Check the Id is set when the authorization is added
             Transaction transaction = new Transaction
             {
                 AmountAvailable = newAuthorization.Amount,

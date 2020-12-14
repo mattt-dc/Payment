@@ -158,17 +158,43 @@ namespace PaymentGateway.Domain
 
         public async Task<TransactionOutput> VoidTransaction(long authorizationId)
         {
+            Transaction transaction = await _paymentRepository.GetTransaction(authorizationId);
+            if (transaction == null)
+            {
+                TransactionOutput transactionOutput = GetFailedTransactionOutput("Invalid authorization");
+                return transactionOutput;
+            }
             //Send to bank
-            //If fails to send return here
+            string responseMessage = await SendVoidRequestToBank(transaction);
+            if (responseMessage != "success")
+            {
+                TransactionOutput transactionOutput = GetFailedTransactionOutput("Void failed");
+                return transactionOutput;
+            }
 
             bool recorded = await _paymentRepository.MarkTransactionAsVoid(authorizationId);
+            //Todo: log if fails to void
 
-            //Get amount available and currency from db
             TransactionOutput output = new TransactionOutput
             {
-
+                AmountAvailable = 0,
+                Currency = transaction.Currency,
+                Error = null,
+                Success = true
             };
             return output;
+        }
+
+        private async Task<string> SendVoidRequestToBank(Transaction transaction)
+        {
+            dynamic voidRequest = new
+            {
+                ID = transaction.ExternalId
+            };
+            ByteArrayContent requestContent = GetByteContentFromDynamicObject(voidRequest);
+            HttpResponseMessage response = await _client.PostAsync(bankApiAddress + "void", requestContent);
+            string responseMessage = await response.Content.ReadAsStringAsync();
+            return responseMessage;
         }
 
         public async Task<TransactionOutput> RefundPayment(PaymentRequest paymentRequest)
