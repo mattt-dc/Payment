@@ -17,10 +17,10 @@ namespace PaymentGateway.Domain
         private readonly HttpClient _client;
         string bankApiAddress = "http://app:8080/";
 
-        public PaymentService(IPaymentRepository paymentRepository)
+        public PaymentService(IPaymentRepository paymentRepository, HttpClient httpClient)
         {
             _paymentRepository = paymentRepository;
-            _client = new HttpClient();
+            _client = httpClient;
         }
 
         public async Task<AuthorizationOutput> AuthorizeTransaction(AuthorizationInput authorizationInput)

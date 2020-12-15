@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -36,6 +37,9 @@ namespace PaymentGateway.Api
                 Options => Options.UseSqlServer(connectionString));
             services.AddScoped<PaymentService>();
             services.AddScoped<IPaymentRepository, PaymentRepository>();
+            HttpClient httpClient = new HttpClient();
+            services.AddSingleton(httpClient);
+            services.AddHttpClient();
             services.AddControllers();
         }
 
