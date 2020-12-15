@@ -235,8 +235,9 @@ namespace PaymentGateway.Domain
                 return transactionOutput;
             }
             decimal paymentAmountsTotal = transaction.Payments.Sum(x => x.Amount);
+            decimal refundAmountsTotal = transaction.Refunds.Sum(x => x.Amount);
             decimal totalAvailable = GetTotalAmountAvailable(transaction);
-            if (paymentAmountsTotal < paymentRequest.Amount || totalAvailable < paymentRequest.Amount)
+            if (paymentAmountsTotal < paymentRequest.Amount + refundAmountsTotal  || totalAvailable < paymentRequest.Amount)
             {
                 TransactionOutput transactionOutput = GetFailedTransactionOutput("Invalid amount");
                 return transactionOutput;
