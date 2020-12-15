@@ -255,7 +255,7 @@ namespace PaymentGateway.Domain
 
             TransactionOutput output = new TransactionOutput
             {
-                AmountAvailable = totalAvailable + paymentRequest.Amount,
+                AmountAvailable = totalAvailable + paymentRequest.Amount - paymentAmountsTotal,
                 Currency = transaction.Currency,
                 Error = null,
                 Success = true
