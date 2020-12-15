@@ -45,7 +45,11 @@ namespace PaymentGateway.Data
         {
             var authorization = await _dbContext.Authorizations.Include(x => x.Payments)
                 .Include(x => x.Refunds)
-                .FirstAsync(x => x.Id.Equals(authorizationId) && !x.Void);
+                .FirstOrDefaultAsync(x => x.Id.Equals(authorizationId) && !x.Void);
+            if (authorization == null)
+            {
+                return null;
+            }
 
             Transaction transaction = new Transaction
             {
@@ -97,6 +101,7 @@ namespace PaymentGateway.Data
             var authorization = await _dbContext.Authorizations.FirstAsync(x => x.Id.Equals(authorizationId));
             authorization.Void = true;
             _dbContext.Authorizations.Update(authorization);
+            await _dbContext.SaveChangesAsync();
 
             return true;
         }
